@@ -7,11 +7,16 @@ import (
 
 type TraceWriter struct {
 	session *gocql.Session
+	log     log.LoggerInterface
 }
 
 func (t *TraceWriter) Write(p []byte) (n int, err error) {
-	log.Info(string(p[:len(p)-1]))
+	t.log.Info(string(p[:len(p)-1]))
 	return len(p), nil
+}
+
+func NewTraceWriter(s *gocql.Session, l log.LoggerInterface) *TraceWriter {
+	return &TraceWriter{session: s, log: l}
 }
 
 func init() {
@@ -19,8 +24,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
-	logger.SetAdditionalStackDepth(1)
 	log.ReplaceLogger(logger)
 }
 
@@ -41,7 +44,25 @@ func main() {
 		log.Critical(err)
 	}
 
-	writer := &TraceWriter{session: traceSession}
+	// Create a new logger instance that we adjust the stack depth for to get
+	// more meaningful frames
+	logger, err := log.LoggerFromConfigAsString(
+		`<seelog>
+            <outputs>
+                <console formatid="fmt"/>
+            </outputs>
+            <formats>
+                <format id="fmt" format="%Date(Jan 02 2006 03:04:05.000) [%LEVEL] %File:%Line - %Msg%n"/>
+            </formats>
+        </seelog>
+        `)
+	logger.SetAdditionalStackDepth(2)
+
+	if err != nil {
+		log.Critical(err)
+	}
+
+	writer := NewTraceWriter(traceSession, logger)
 	tracer := gocql.NewTraceWriter(traceSession, writer)
 	session.SetTrace(tracer)
 
