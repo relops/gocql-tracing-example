@@ -19,6 +19,8 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
+	logger.SetAdditionalStackDepth(1)
 	log.ReplaceLogger(logger)
 }
 
