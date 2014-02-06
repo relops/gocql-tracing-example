@@ -1,0 +1,13 @@
+<seelog type="sync">
+
+    <outputs formatid="main">
+        <filter levels="info,warn,error">
+            <console />
+        </filter>
+    </outputs>
+
+    <formats>
+        <format id="main" format="%Date(Jan 02 2006 03:04:05.000) [%LEVEL] %File:%Line - %Msg%n"/>
+    </formats>
+
+</seelog>
