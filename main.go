@@ -38,7 +38,7 @@ func main() {
 	}
 
 	traceSession, err := cluster.CreateSession()
-	defer session.Close()
+	defer traceSession.Close()
 
 	if err != nil {
 		log.Critical(err)
